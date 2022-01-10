@@ -4,6 +4,11 @@
   "description": "Minimal template engine with compiled output for JavaScript.",
   "main": "./dist/seagull.js",
   "typings": "./dist/seagull.d.ts",
+  "keywords": [
+    "template",
+    "templates",
+    "seagull"
+  ],
   "author": {
     "name": "Nando Vieira",
     "email": "me@fnando.com",
