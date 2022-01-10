@@ -1,0 +1,10 @@
+.github/**/*
+tsconfig.json
+template.sea
+src/**/*
+Seagull.sublime-syntax
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+*.config.js
+*.tgz
+dist/**/*.test.*

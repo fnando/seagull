@@ -1,0 +1,109 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - sea
+scope: text.html.seagull
+variables:
+  block_opening: "({)"
+  block_closing: "(})"
+  variable: "([a-z0-9A-Z_.]+)"
+
+contexts:
+  main:
+    - include: tags
+    - include: variables
+    - include: conditionals
+    - include: each
+
+  tags:
+    - include: scope:text.html.basic
+
+  variables:
+    - match:
+        "{{block_opening}}{{variable}}(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?{{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: support.constant.seagull
+        3: keyword.operator.bitwise.seagull
+        4: support.function.seagull
+        5: keyword.operator.bitwise.seagull
+        6: support.function.seagull
+        7: keyword.operator.bitwise.seagull
+        8: support.function.seagull
+        9: keyword.operator.bitwise.seagull
+        10: support.function.seagull
+        11: keyword.operator.bitwise.seagull
+        12: support.function.seagull
+        13: keyword.operator.bitwise.seagull
+        14: support.function.seagull
+        15: keyword.operator.bitwise.seagull
+        16: support.function.seagull
+        17: keyword.operator.bitwise.seagull
+        18: support.function.seagull
+        19: entity.name.tag.seagull
+
+  conditionals:
+    - match:
+        "{{block_opening}}(if|unless) +{{variable}}(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?{{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.seagull
+        3: variable.other.readwrite.seagull
+        4: keyword.operator.bitwise.seagull
+        5: support.function.seagull
+        6: keyword.operator.bitwise.seagull
+        7: support.function.seagull
+        8: keyword.operator.bitwise.seagull
+        9: support.function.seagull
+        10: keyword.operator.bitwise.seagull
+        11: support.function.seagull
+        12: keyword.operator.bitwise.seagull
+        13: support.function.seagull
+        14: keyword.operator.bitwise.seagull
+        15: support.function.seagull
+        16: keyword.operator.bitwise.seagull
+        17: support.function.seagull
+        20: entity.name.tag.seagull
+      push: conditionals_content
+
+  conditionals_content:
+    - include: main
+    - match: "{{block_opening}}(/\\2){{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.seagull
+        3: entity.name.tag.seagull
+      pop: true
+
+  each:
+    - match:
+        "{{block_opening}}(each) +(?:{{variable}}|{{variable}} (=>)
+        {{variable}})(?:, {{variable}})? +(in) +{{variable}}{{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.loop.for.seagull
+        3: variable.other.readwrite.seagull
+        4: variable.other.readwrite.seagull
+        5: keyword.operator.assignment.seagull
+        6: variable.other.readwrite.seagull
+        7: variable.other.readwrite.seagull
+        8: keyword.operator.word.seagull
+        9: variable.other.readwrite.seagull
+        10: entity.name.tag.seagull
+      push: each_content
+
+  each_content:
+    - include: main
+    - match: "{{block_opening}}(/each){{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.loop.for.seagull
+        3: entity.name.tag.seagull
+      pop: true

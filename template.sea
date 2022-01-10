@@ -1,0 +1,55 @@
+<h1>This is the title</h1>
+<p>
+  Hello there, {name}.
+</p>
+
+<p>reverseUpcase: {name | upcase | reverse}</p>
+<p>multi: {name | upcase}</p>
+<p>pipedUndef: {undef | upcase}</p>
+<p>pipedNulled: {nulled | upcase}</p>
+
+<ul class="loop">
+  {each person in people}
+    <li>{person.name}</li>
+  {/each}
+</ul>
+
+<ul class="loop-with-index">
+  {each person, index in people}
+    <li>{index} -> {person.name}</li>
+  {/each}
+</ul>
+
+<ul class="loop-dict">
+  {each key => value in color}
+    <li>{key} -> {value}</li>
+  {/each}
+</ul>
+
+<ul class="loop-dict-with-index">
+  {each key => value, index in color}
+    <li>{index} - {key} -> {value}</li>
+  {/each}
+</ul>
+
+<ul class="loop-with-conditionals">
+  {each number in numbers}
+    {if number | odd}
+      <li class="odd">{number.value}</li>
+    {/if}
+
+    {unless number | odd}
+      <li class="even">{number.value}</li>
+    {/unless}
+  {/each}
+</ul>
+
+{if isReady}
+  {if isDone}
+    <p class="ready">Ready and done! {date}</p>
+  {/if}
+{/if}
+
+{unless isReady}
+  <p class="pending">Pending!</p>
+{/unless}
