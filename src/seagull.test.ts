@@ -146,6 +146,12 @@ describe("seagull", () => {
     expect(decode(output)).toEqual("<script>alert('pwd');</script>");
   });
 
+  test("pipes strings into helpers", () => {
+    expect(compile(`{"hello" | upcase}`)(context)).toEqual("HELLO");
+    expect(compile(`{'hello' | upcase}`)(context)).toEqual("HELLO");
+    expect(compile(`{'hello' | upcase | downcase}`)(context)).toEqual("hello");
+  });
+
   test("raise error when blocks are closed in wrong order", () => {
     expect(() => {
       compile(`

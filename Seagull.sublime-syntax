@@ -13,6 +13,8 @@ contexts:
   main:
     - include: tags
     - include: variables
+    - include: string_piping_double_quote
+    - include: string_piping_single_quote
     - include: conditionals
     - include: each
 
@@ -45,6 +47,78 @@ contexts:
         17: keyword.operator.bitwise.seagull
         18: support.function.seagull
         19: entity.name.tag.seagull
+
+  string_piping_double_quote:
+    - match:
+        "{{block_opening}}(\")([^\n\r]+)(\")( *\\| *){{variable}}(?:( *\\|
+        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
+        *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\|
+        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
+        *\\| *){{variable}})?"
+      captures:
+        1: entity.name.tag.seagull
+        2:
+          punctuation.definition.string.begin.seagull
+          string.quoted.double.seagull
+        3: string.quoted.double.seagull
+        4:
+          punctuation.definition.string.end.seagull string.quoted.double.seagull
+        5: keyword.operator.bitwise.seagull
+        6: support.function.seagull
+        7: keyword.operator.bitwise.seagull
+        8: support.function.seagull
+        9: keyword.operator.bitwise.seagull
+        10: support.function.seagull
+        11: keyword.operator.bitwise.seagull
+        12: support.function.seagull
+        13: keyword.operator.bitwise.seagull
+        14: support.function.seagull
+        15: keyword.operator.bitwise.seagull
+        16: support.function.seagull
+        17: keyword.operator.bitwise.seagull
+        18: support.function.seagull
+        19: keyword.operator.bitwise.seagull
+        20: support.function.seagull
+        21: keyword.operator.bitwise.seagull
+        22: support.function.seagull
+        23: keyword.operator.bitwise.seagull
+        24: support.function.seagull
+
+  string_piping_single_quote:
+    - match:
+        "{{block_opening}}(')([^\n\r]+)(')( *\\| *){{variable}}(?:( *\\|
+        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
+        *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\|
+        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
+        *\\| *){{variable}})?"
+      captures:
+        1: entity.name.tag.seagull
+        2:
+          punctuation.definition.string.begin.seagull
+          string.quoted.single.seagull
+        3: string.quoted.single.seagull
+        4:
+          punctuation.definition.string.end.seagull string.quoted.single.seagull
+        5: keyword.operator.bitwise.seagull
+        6: support.function.seagull
+        7: keyword.operator.bitwise.seagull
+        8: support.function.seagull
+        9: keyword.operator.bitwise.seagull
+        10: support.function.seagull
+        11: keyword.operator.bitwise.seagull
+        12: support.function.seagull
+        13: keyword.operator.bitwise.seagull
+        14: support.function.seagull
+        15: keyword.operator.bitwise.seagull
+        16: support.function.seagull
+        17: keyword.operator.bitwise.seagull
+        18: support.function.seagull
+        19: keyword.operator.bitwise.seagull
+        20: support.function.seagull
+        21: keyword.operator.bitwise.seagull
+        22: support.function.seagull
+        23: keyword.operator.bitwise.seagull
+        24: support.function.seagull
 
   conditionals:
     - match:

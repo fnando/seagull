@@ -59,6 +59,14 @@ class UnmatchedBlockError extends Error {
   } = { line: 0, column: 0, expected: "", actual: "" };
 }
 
+class InvalidTemplateError extends Error {
+  public detail: {
+    template: string;
+    output: string;
+    captures: string[];
+  } = { template: "", output: "", captures: [] };
+}
+
 export const encodeHelper = `
 const _encode = (unsafe) =>
   String(unsafe).replace(
@@ -193,6 +201,38 @@ const variableExpressionParser = {
       output: ` + ${input}`,
       globalCaptures,
       localCaptures: [isLocalCapture ? captureTarget : ""].filter(Boolean),
+    };
+  },
+};
+
+const stringPipingExpressionParser = {
+  match: /^{((["']).*?(\1))( *\| *[a-z0-9_.]+)+}$/i,
+  process(expression: string): ExpressionParserResult {
+    const matches = expression.match(this.match);
+
+    if (!matches) {
+      throw new Error(
+        `Running expression parser that didn't return any matches: ${expression}`,
+      );
+    }
+
+    const capture = matches[1];
+    let input = `${capture}`;
+
+    const globalCaptures = [];
+
+    if (matches[4]) {
+      const chain = buildHelperChain(input, matches[4]);
+      globalCaptures.push(...chain.captures);
+      input = chain.output;
+    }
+
+    input = `_encode(${input})`;
+
+    return {
+      output: ` + ${input}`,
+      globalCaptures,
+      localCaptures: [].filter(Boolean),
     };
   },
 };
@@ -381,6 +421,7 @@ export const expressionParsers: ExpressionParser[] = [
   eachArrayExpressionParser,
   eachDictionaryExpressionParser,
   eachClosingExpressionParser,
+  stringPipingExpressionParser,
 ];
 
 const compileExpression = (
@@ -495,5 +536,14 @@ export const compile = (template: string, includeEscapeHelper = true) => {
     output = `${encodeHelper}\n${output}`;
   }
 
-  return new Function(`{${captures.join(", ")}}`, output);
+  try {
+    return new Function(`{${captures.join(", ")}}`, output);
+  } catch (originalError) {
+    const error = new InvalidTemplateError(
+      "The template generated invalid JavaScript code.",
+    );
+    error.detail = { template, output, captures };
+
+    throw error;
+  }
 };
