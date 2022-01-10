@@ -11,6 +11,10 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
+## Unreleased
+
+- Add `@ts-nocheck` to compiled files.
+
 ## v0.0.1 - 2022-01-09
 
 - Initial release.

@@ -12,13 +12,9 @@ function writeFile(filePath: string, contents: string) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(
     filePath,
-    [
-      "/* eslint-disable */",
-      "/* tslint:disable */",
-      encodeHelper,
-      contents,
-      "",
-    ].join("\n"),
+    ["/* eslint-disable */", "// @ts-nocheck", encodeHelper, contents, ""].join(
+      "\n",
+    ),
   );
 }
 
