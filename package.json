@@ -1,6 +1,6 @@
 {
   "name": "@fnando/seagull",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Minimal template engine with compiled output for JavaScript.",
   "main": "./dist/seagull.js",
   "typings": "./dist/seagull.d.ts",
