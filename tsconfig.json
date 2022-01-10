@@ -1,0 +1,16 @@
+{
+  "extends": "@fnando/codestyle",
+  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": false,
+    "sourceMap": true,
+    "declaration": true,
+    "outDir": "dist",
+    "lib": ["es5"],
+    "target": "es5",
+    "baseUrl": ".",
+    "paths": {
+      "walrus": ["./src/walrus.ts"]
+    }
+  }
+}

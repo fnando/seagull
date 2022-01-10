@@ -1,0 +1,109 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - wrs
+scope: text.html.walrus
+variables:
+  block_opening: "({)"
+  block_closing: "(})"
+  variable: "([a-z0-9A-Z_.]+)"
+
+contexts:
+  main:
+    - include: tags
+    - include: variables
+    - include: conditionals
+    - include: each
+
+  tags:
+    - include: scope:text.html.basic
+
+  variables:
+    - match:
+        "{{block_opening}}{{variable}}(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
+        ){{variable}})?{{block_closing}}"
+      captures:
+        1: entity.name.tag.walrus
+        2: support.constant.walrus
+        3: keyword.operator.bitwise.walrus
+        4: support.function.walrus
+        5: keyword.operator.bitwise.walrus
+        6: support.function.walrus
+        7: keyword.operator.bitwise.walrus
+        8: support.function.walrus
+        9: keyword.operator.bitwise.walrus
+        10: support.function.walrus
+        11: keyword.operator.bitwise.walrus
+        12: support.function.walrus
+        13: keyword.operator.bitwise.walrus
+        14: support.function.walrus
+        15: keyword.operator.bitwise.walrus
+        16: support.function.walrus
+        17: keyword.operator.bitwise.walrus
+        18: support.function.walrus
+        19: entity.name.tag.walrus
+
+  conditionals:
+    - match:
+        "{{block_opening}}(if|unless) +{{variable}}(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
+        \\| ){{variable}})?{{block_closing}}"
+      captures:
+        1: entity.name.tag.walrus
+        2: keyword.control.conditional.walrus
+        3: variable.other.readwrite.walrus
+        4: keyword.operator.bitwise.walrus
+        5: support.function.walrus
+        6: keyword.operator.bitwise.walrus
+        7: support.function.walrus
+        8: keyword.operator.bitwise.walrus
+        9: support.function.walrus
+        10: keyword.operator.bitwise.walrus
+        11: support.function.walrus
+        12: keyword.operator.bitwise.walrus
+        13: support.function.walrus
+        14: keyword.operator.bitwise.walrus
+        15: support.function.walrus
+        16: keyword.operator.bitwise.walrus
+        17: support.function.walrus
+        20: entity.name.tag.walrus
+      push: conditionals_content
+
+  conditionals_content:
+    - include: main
+    - match: "{{block_opening}}(/\\2){{block_closing}}"
+      captures:
+        1: entity.name.tag.walrus
+        2: keyword.control.conditional.walrus
+        3: entity.name.tag.walrus
+      pop: true
+
+  each:
+    - match:
+        "{{block_opening}}(each) +(?:{{variable}}|{{variable}} (=>)
+        {{variable}})(?:, {{variable}})? +(in) +{{variable}}{{block_closing}}"
+      captures:
+        1: entity.name.tag.walrus
+        2: keyword.control.loop.for.walrus
+        3: variable.other.readwrite.walrus
+        4: variable.other.readwrite.walrus
+        5: keyword.operator.assignment.walrus
+        6: variable.other.readwrite.walrus
+        7: variable.other.readwrite.walrus
+        8: keyword.operator.word.walrus
+        9: variable.other.readwrite.walrus
+        10: entity.name.tag.walrus
+      push: each_content
+
+  each_content:
+    - include: main
+    - match: "{{block_opening}}(/each){{block_closing}}"
+      captures:
+        1: entity.name.tag.walrus
+        2: keyword.control.loop.for.walrus
+        3: entity.name.tag.walrus
+      pop: true
