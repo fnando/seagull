@@ -137,8 +137,13 @@ describe("seagull", () => {
 
   test("escapes values", () => {
     const render = compile(`{text}`);
-    const output = decode(render({ text: "<script>alert('pwd');</script>" }));
-    expect(output).toEqual("<script>alert('pwd');</script>");
+    const output = render({ text: "<script>alert('pwd');</script>" });
+
+    expect(output).toEqual(
+      "&#0060;script&#0062;alert&#0040;&#0039;pwd&#0039;&#0041;" +
+        "&#0059;&#0060;&#0047;script&#0062;",
+    );
+    expect(decode(output)).toEqual("<script>alert('pwd');</script>");
   });
 
   test("raise error when blocks are closed in wrong order", () => {
