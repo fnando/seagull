@@ -7,9 +7,9 @@ scope: text.html.seagull
 variables:
   block_opening: "({)"
   block_closing: "(})"
-  variable: "([a-zA-Z_]+)"
-  property: "([a-zA-Z_](?:\\.?[a-zA-Z_][a-zA-Z_0-9]*)*)"
-  function: "([a-zA-Z_]+)"
+  variable: "([a-zA-Z_][a-zA-Z0-9_]*)"
+  property: "([a-zA-Z_][a-zA-Z0-9_]*(?:\\.?[a-zA-Z_][a-zA-Z_0-9]*)*)"
+  function: "([a-zA-Z_][a-zA-Z0-9_]*)"
   piping: "\\|"
 version: 2
 contexts:
@@ -39,6 +39,27 @@ contexts:
       push: placeholder_inner
 
   placeholder_inner:
+    - match: "{{variable}}(=){{property}}"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: variable.other.seagull
+    - match: '{{variable}}(=)(")'
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3:
+          string.quoted.double.seagull
+          punctuation.definition.string.begin.seagull
+      push: double_quoted_string
+    - match: "{{variable}}(=)(')"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3:
+          string.quoted.double.seagull
+          punctuation.definition.string.begin.seagull
+      push: single_quoted_string
     - match: "{{piping}}"
       scope: keyword.operator.bitwise.seagull
       push: piping
@@ -65,9 +86,11 @@ contexts:
       scope: entity.name.tag.seagull
 
   double_quoted_string:
-    - meta_scope: string.quoted.double.seagull
+    - match: '[^"]*'
+      scope: string.quoted.double.seagull
     - match: '"'
-      scope: punctuation.definition.string.end.seagull
+      scope:
+        punctuation.definition.string.end.seagull string.quoted.double.seagull
       pop: true
 
   # Placeholder with single quoted strings #####################################
@@ -86,9 +109,11 @@ contexts:
       scope: entity.name.tag.seagull
 
   single_quoted_string:
-    - meta_scope: string.quoted.single.seagull
+    - match: "[^']"
+      scope: string.quoted.single.seagull
     - match: "'"
-      scope: punctuation.definition.string.end.seagull
+      scope:
+        punctuation.definition.string.end.seagull string.quoted.single.seagull
       pop: true
 
   # Each block #################################################################

@@ -101,6 +101,9 @@ Iterating dictionaries (objects with key value):
 
 #### Helpers
 
+Helpers that receive one single positional argument must be called by pipeling
+the parameter into the helper.
+
 ```
 You're name in reverse is {name | upcase | reverse}.
 ```
@@ -138,6 +141,23 @@ template({
     input.length === 0,
 });
 ```
+
+Finally, you can also pipe strings to helpers.
+
+```
+{"seagull_is_nice" | i18n}
+{'seagull_is_nice' | i18n}
+```
+
+If you're function requires multiple parameters, then you can use the named
+parameter call.
+
+```
+{i18n path="messages.hello" name=user.name}
+```
+
+This will translate to a call like
+`i18n({path: "message.hello", name: user.name})`.
 
 #### HTML Escaping
 

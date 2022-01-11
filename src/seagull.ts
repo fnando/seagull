@@ -200,6 +200,8 @@ const validateExpressionMatches = (
   const error = new GenericExpressionError(
     `Cannot run expression parser without matches: ${expression}`,
   );
+
+  // eslint-disable-next-line prefer-const
   let { line, column } = extractLocation(scope);
   column -= expression.length;
 
@@ -406,7 +408,7 @@ const unlessClosingExpressionParser = {
 
 const eachArrayExpressionParser = {
   match:
-    /^{each ([a-zA-z0-9_]+)(?:, *([a-z0-9_]+)(?:, *([a-z0-9_]+))?)? +in +([a-zA-z0-9_.]+)}$/,
+    /^{each ([a-zA-z0-9_]+)(?:, *([a-zA-z0-9_]+)(?:, *([a-zA-z0-9_]+))?)? +in +([a-zA-z0-9_.]+)}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
     const matches = validateExpressionMatches(
       scope,
@@ -469,6 +471,58 @@ const eachClosingExpressionParser = {
   },
 };
 
+const functionCallExpressionParser = {
+  match: /^{([a-z0-9._]+)( +[a-z0-9_]+=('.*?'|".*?"|[a-z0-9_.]+))+}$/i,
+  process(expression: string, scope: Scope): ExpressionParserResult {
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
+
+    const capture = matches[1];
+    let rawAttrs = matches[2].trim();
+    const globalCaptures = [];
+    const regex = /([a-z0-9_]+)=(".*?"|'.*?'|[a-z0-9_.]+)/;
+    let result = regex.exec(rawAttrs);
+    const attrs: string[] = [];
+
+    while (result) {
+      const key = result[1];
+      const value = result[2];
+
+      attrs.push(key === value ? key : `${key}: ${value}`);
+
+      if (!value.match(/^["']/)) {
+        const valueTarget = value.split(".")[0];
+        const isLocalCapture = hasLocalCapture(scope, valueTarget);
+
+        if (!isLocalCapture) {
+          globalCaptures.push(valueTarget);
+        }
+      }
+
+      rawAttrs = rawAttrs.substring(result[0].length).trim();
+      result = regex.exec(rawAttrs);
+    }
+
+    const input = `_encode(${capture}({${attrs.join(", ")}}))`;
+
+    const captureTarget = capture.split(".")[0];
+    const isLocalCapture = hasLocalCapture(scope, captureTarget);
+
+    if (!isLocalCapture) {
+      globalCaptures.push(captureTarget);
+    }
+
+    return {
+      output: ` + ${input}`,
+      globalCaptures,
+      localCaptures: [isLocalCapture ? captureTarget : ""].filter(Boolean),
+    };
+  },
+};
+
 /**
  * List of expression parsers.
  * @type {ExpressionParser[]}
@@ -483,6 +537,7 @@ export const expressionParsers: ExpressionParser[] = [
   eachDictionaryExpressionParser,
   eachClosingExpressionParser,
   stringPipingExpressionParser,
+  functionCallExpressionParser,
 ];
 
 const compileExpression = (

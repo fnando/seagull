@@ -14,6 +14,8 @@ Prefix your message with one of the following:
 ## Unreleased
 
 - [Added] Support for piping strings into helpers (e.g. `{"hello" | upcase}`).
+- [Added] Support for function calls using named parameters (e.g.
+  `{i18n path="message.hello" name=user.name}`).
 
 ## v0.0.2 - 2022-01-09
 
