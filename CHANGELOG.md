@@ -11,6 +11,10 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
+## Unreleased
+
+- [Added] Support for piping strings into helpers (e.g. `{"hello" | upcase}`).
+
 ## v0.0.2 - 2022-01-09
 
 - Add `@ts-nocheck` to compiled files.
