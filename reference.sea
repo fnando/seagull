@@ -3,6 +3,11 @@
   Hello there, {name}.
 </p>
 
+{when status="ready"}Ready!{/when}
+{when status="pending"}Pending!{/when}
+{when status=pendingStatus}Pending!{/when}
+{when status=obj.pendingStatus}Pending!{/when}
+
 <p>reverseUpcase: {name | upcase | reverse}</p>
 <p>multi: {name | upcase}</p>
 <p>pipedUndef: {undef | upcase}</p>

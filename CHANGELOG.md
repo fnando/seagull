@@ -13,6 +13,10 @@ Prefix your message with one of the following:
 
 ## Unreleased
 
+- [Added] `{when}` blocks, similar to `if(a === b) {}`.
+
+## v0.0.3 - 2022-01-10
+
 - [Added] Support for piping strings into helpers (e.g. `{"hello" | upcase}`).
 - [Added] Support for function calls using named parameters (e.g.
   `{i18n path="message.hello" name=user.name}`).

@@ -351,6 +351,49 @@ const ifClosingExpressionParser = {
   },
 };
 
+const whenExpressionParser = {
+  match:
+    /^{when ([a-zA-z0-9._]+)=([a-zA-z0-9._]+|'[^\t\r\n']+'|"[^\t\r\n']+")}$/,
+  process(expression: string, scope: Scope): ExpressionParserResult {
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
+
+    const [, capture, value] = matches;
+    const globalCaptures: string[] = [];
+
+    scope.blocks.push("when");
+
+    const [captureTarget] = capture.split(".");
+    const isLocalCapture = hasLocalCapture(scope, captureTarget);
+
+    if (!isLocalCapture) {
+      globalCaptures.push(captureTarget);
+    }
+
+    return {
+      output: ` + (${capture} === ${value} ? ( ""`,
+      globalCaptures,
+      localCaptures: [],
+    };
+  },
+};
+
+const whenClosingExpressionParser = {
+  match: /^{\/when}$/,
+  process(_expression: string, scope: Scope): ExpressionParserResult {
+    validateClosingBlock(scope, "when");
+
+    return {
+      output: `) : "")`,
+      globalCaptures: [],
+      localCaptures: [],
+    };
+  },
+};
+
 const unlessExpressionParser = {
   match: /^{unless ([a-zA-z0-9._]+)((?: *\| *[a-zA-z0-9_]+)+)?}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
@@ -521,6 +564,8 @@ const functionCallExpressionParser = {
  */
 export const expressionParsers: ExpressionParser[] = [
   variableExpressionParser,
+  whenExpressionParser,
+  whenClosingExpressionParser,
   ifExpressionParser,
   ifClosingExpressionParser,
   unlessExpressionParser,

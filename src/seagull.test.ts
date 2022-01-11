@@ -118,6 +118,21 @@ describe("seagull", () => {
     expect(render(context)).toEqual("Have items!");
   });
 
+  test("compiles when", () => {
+    const render = compile(`
+      {when status="ready"}Ready!{/when}
+      {when status="pending"}Pending!{/when}
+    `);
+
+    let output = render({ status: "ready" });
+    expect(output).toContain("Ready!");
+    expect(output).not.toContain("Pending!");
+
+    output = render({ status: "pending" });
+    expect(output).not.toContain("Ready!");
+    expect(output).toContain("Pending!");
+  });
+
   test("escapes values", () => {
     const render = compile(`{text}`);
     const output = render({ text: "<script>alert('pwd');</script>" });
@@ -225,5 +240,29 @@ describe("seagull", () => {
         {/if}
       `);
     }).toThrow("Expected {/if}, got {/unless} (line: 6, column: 13)");
+
+    expect(() => {
+      compile(`
+        {each person in people}
+          {when status="ready"}
+            {if isReady}
+              <p>{person.name}</p>
+            {/when}
+          {/each}
+        {/if}
+      `);
+    }).toThrow("Expected {/if}, got {/when} (line: 6, column: 13)");
+
+    expect(() => {
+      compile(`
+        {each person in people}
+          {when status="ready"}
+            {if isReady}
+              <p>{person.name}</p>
+            {/if}
+          {/if}
+        {/when}
+      `);
+    }).toThrow("Expected {/when}, got {/if} (line: 7, column: 11)");
   });
 });

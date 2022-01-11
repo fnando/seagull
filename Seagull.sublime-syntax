@@ -15,6 +15,7 @@ version: 2
 contexts:
   main:
     - include: scope:text.html.basic
+    - include: when_conditional
     - include: if_conditional
     - include: unless_conditional
     - include: each
@@ -27,18 +28,7 @@ contexts:
       scope: support.function.seagull
       pop: true
 
-  # Placeholder variables ######################################################
-  # {name}
-  # {name | func}
-  # {name | func | func | func | func}
-  placeholder:
-    - match: "{{block_opening}}{{property}}"
-      captures:
-        1: entity.name.tag.seagull
-        2: variable.other.seagull
-      push: placeholder_inner
-
-  placeholder_inner:
+  key_value:
     - match: "{{variable}}(=){{property}}"
       captures:
         1: variable.other.seagull
@@ -60,6 +50,20 @@ contexts:
           string.quoted.double.seagull
           punctuation.definition.string.begin.seagull
       push: single_quoted_string
+
+  # Placeholder variables ######################################################
+  # {name}
+  # {name | func}
+  # {name | func | func | func | func}
+  placeholder:
+    - match: "{{block_opening}}{{property}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: variable.other.seagull
+      push: placeholder_inner
+
+  placeholder_inner:
+    - include: key_value
     - match: "{{piping}}"
       scope: keyword.operator.bitwise.seagull
       push: piping
@@ -163,11 +167,41 @@ contexts:
       scope: keyword.operator.bitwise.seagull
       push: piping
     - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
     - include: main
     - match: "{{block_opening}}(/if){{block_closing}}"
       captures:
         1: entity.name.tag.seagull
         2: keyword.control.conditional.end.seagull
+        3: entity.name.tag.seagull
+      pop: true
+
+  # When block #################################################################
+  # {when key=value}{/when}
+  # {when key=obj.value}{/when}
+  # {when key="value"}{/when}
+  # {when key='value'}{/when}
+  when_conditional:
+    - match: "{{block_opening}}(when) +"
+      captures:
+        1: entity.name.tag.seagull
+        2:
+          keyword.control.conditional.begin.seagull
+          keyword.control.conditional.switch.seagull
+        3: variable.other.seagull
+      push: when_inner
+
+  when_inner:
+    - include: key_value
+    - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
+    - include: main
+    - match: "{{block_opening}}(/when){{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2:
+          keyword.control.conditional.end.seagull
+          keyword.control.conditional.switch.seagull
         3: entity.name.tag.seagull
       pop: true
 
@@ -188,6 +222,7 @@ contexts:
       scope: keyword.operator.bitwise.seagull
       push: piping
     - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
     - include: main
     - match: "{{block_opening}}(/unless){{block_closing}}"
       captures:

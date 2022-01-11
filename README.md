@@ -56,14 +56,14 @@ render({ name: "John" });
 
 #### Variables
 
-```
+```seagull
 Hello there, {name}.
 Hello there, {person.name}.
 ```
 
 #### Conditionals
 
-```
+```seagull
 {if isReady}
   Ready!
 {/if}
@@ -71,13 +71,18 @@ Hello there, {person.name}.
 {unless isReady}
   Pending!
 {/unless}
+
+{when status="ready"}Ready!{/when}
+{when status='ready'}Ready!{/when}
+{when status=readyStatus}Ready!{/when}
+{when status=statuses.ready}Ready!{/when}
 ```
 
 #### Iteration
 
 Iterating arrays:
 
-```
+```seagull
 {each person in people}
   Hi there, {person.name}.
 {/each}
@@ -89,7 +94,7 @@ Iterating arrays:
 
 Iterating dictionaries (objects with key value):
 
-```
+```seagull
 {each id => person in peopleMap}
   Hello, {person.name}. Your id is {id}.
 {/each}
@@ -104,7 +109,7 @@ Iterating dictionaries (objects with key value):
 Helpers that receive one single positional argument must be called by pipeling
 the parameter into the helper.
 
-```
+```seagull
 You're name in reverse is {name | upcase | reverse}.
 ```
 
@@ -125,7 +130,7 @@ template({
 
 The `if` and `unless` blocks also accept helper piping.
 
-```
+```seagull
 {if emails | isEmpty}
   You have no mail!
 {/if}
@@ -144,7 +149,7 @@ template({
 
 Finally, you can also pipe strings to helpers.
 
-```
+```seagull
 {"seagull_is_nice" | i18n}
 {'seagull_is_nice' | i18n}
 ```
@@ -152,7 +157,7 @@ Finally, you can also pipe strings to helpers.
 If you're function requires multiple parameters, then you can use the named
 parameter call.
 
-```
+```seagull
 {i18n path="messages.hello" name=user.name}
 ```
 
