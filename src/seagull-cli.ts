@@ -72,8 +72,12 @@ yargs(process.argv.slice(2))
           "",
         );
         const relativePath = path.relative(process.cwd(), filePath);
+
+        const paths = [relativePath, filePath];
+        paths.sort((a, b) => (a.length >= b.length ? 1 : -1));
+
         console.log(
-          `(error) ${relativePath}:${error.detail.line}:${error.detail.column}`,
+          `(error) ${paths[0]}:${error.detail.line}:${error.detail.column}`,
           message,
         );
 

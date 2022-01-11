@@ -152,7 +152,7 @@ describe("seagull", () => {
     expect(compile(`{'hello' | upcase | downcase}`)(context)).toEqual("hello");
   });
 
-  test("raise error when blocks are closed in wrong order", () => {
+  test("raises error when blocks are closed in wrong order", () => {
     expect(() => {
       compile(`
             {if isReady}

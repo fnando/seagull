@@ -5,6 +5,8 @@ type Scope = {
   buffer: string;
 };
 
+type Location = { line: number; column: number };
+
 type ExpressionParserResult = {
   output: string;
   globalCaptures: string[];
@@ -56,7 +58,7 @@ class UnmatchedBlockError extends Error {
      * @type {string}
      */
     actual: string;
-  } = { line: 0, column: 0, expected: "", actual: "" };
+  } = { line: 1, column: 1, expected: "", actual: "" };
 }
 
 class InvalidTemplateError extends Error {
@@ -65,6 +67,14 @@ class InvalidTemplateError extends Error {
     output: string;
     captures: string[];
   } = { template: "", output: "", captures: [] };
+}
+
+class UnknownExpressionError extends Error {
+  public detail: {
+    line: number;
+    column: number;
+    expression: string;
+  } = { expression: "", line: 1, column: 1 };
 }
 
 export const encodeHelper = `
@@ -137,6 +147,14 @@ const buildHelperChain = (
   };
 };
 
+const extractLocation = (scope: Scope): Location => {
+  const lines = scope.buffer.split(/\r?\n/);
+  const line = Math.max(1, lines.length);
+  const column = Math.max(1, (lines.pop() ?? "").length);
+
+  return { line, column };
+};
+
 const hasLocalCapture = (scope: Scope, capture: string): boolean =>
   scope.localCaptures
     .flatMap((captures) => Array.from(captures.values()))
@@ -149,9 +167,10 @@ const validateClosingBlock = (scope: Scope, currentBlock: string) => {
     return;
   }
 
-  const lines = scope.buffer.split(/\r?\n/);
-  const line = lines.length;
-  const column = (lines.pop() ?? "").length - currentBlock.length - 2;
+  // eslint-disable-next-line prefer-const
+  let { line, column } = extractLocation(scope);
+  column -= currentBlock.length + 2;
+
   const error = new UnmatchedBlockError(
     `Expected {/${expectedBlock}}, got {/${currentBlock}} (line: ${line}, column: ${column})`,
   );
@@ -206,7 +225,7 @@ const variableExpressionParser = {
 };
 
 const stringPipingExpressionParser = {
-  match: /^{((["']).*?(\1))( *\| *[a-z0-9_.]+)+}$/i,
+  match: /^{((["']).*?(\2))( *\| *[a-z0-9_.]+)+}$/i,
   process(expression: string): ExpressionParserResult {
     const matches = expression.match(this.match);
 
@@ -427,11 +446,20 @@ export const expressionParsers: ExpressionParser[] = [
 const compileExpression = (
   expression: string,
   scope: Scope,
+  location: Location,
 ): ExpressionParserResult => {
   const parser = expressionParsers.find((exp) => exp.match.test(expression));
 
   if (!parser) {
-    throw new Error(`Unknown expression: ${expression}`);
+    const { line, column } = location;
+
+    const error = new UnknownExpressionError(
+      `Unknown expression: ${expression} (line: ${line}, column: ${column})`,
+    );
+
+    error.detail = { line, column, expression };
+
+    throw error;
   }
 
   return parser.process(expression, scope);
@@ -456,6 +484,7 @@ export const compileToString = (tree: string[]): CompileToStringResult => {
   const localScopes: string[][] = [];
 
   tree.forEach((node) => {
+    const location = extractLocation(scope);
     scope.buffer += node;
 
     if (node.startsWith("{") && node.endsWith("}")) {
@@ -464,7 +493,7 @@ export const compileToString = (tree: string[]): CompileToStringResult => {
         globalCaptures: newGlobalCaptures,
         localCaptures: newLocalCaptures,
         popBlock,
-      } = compileExpression(node, scope);
+      } = compileExpression(node, scope, location);
 
       newGlobalCaptures.forEach((capture) =>
         scope.globalCaptures.add(capture.split(".")[0]),
