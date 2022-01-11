@@ -7,6 +7,9 @@
 <p>multi: {name | upcase}</p>
 <p>pipedUndef: {undef | upcase}</p>
 <p>pipedNulled: {nulled | upcase}</p>
+<p>
+  {"hello"}
+</p>
 <p>stringPipe: {"hello" | upcase | downcase}</p>
 <p>stringPipe: {'hello' | upcase | downcase}</p>
 

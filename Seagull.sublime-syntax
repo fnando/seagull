@@ -7,177 +7,166 @@ scope: text.html.seagull
 variables:
   block_opening: "({)"
   block_closing: "(})"
-  variable: "([a-z0-9A-Z_.]+)"
-
+  variable: "([a-zA-Z_]+)"
+  property: "([a-zA-Z_](?:\\.?[a-zA-Z_][a-zA-Z_0-9]*)*)"
+  function: "([a-zA-Z_]+)"
+  piping: "\\|"
+version: 2
 contexts:
   main:
-    - include: tags
-    - include: variables
-    - include: string_piping_double_quote
-    - include: string_piping_single_quote
-    - include: conditionals
-    - include: each
-
-  tags:
     - include: scope:text.html.basic
+    - include: if_conditional
+    - include: unless_conditional
+    - include: each
+    - include: placeholder
+    - include: placeholder_with_double_quoted_strings
+    - include: placeholder_with_single_quoted_strings
 
-  variables:
-    - match:
-        "{{block_opening}}{{variable}}(?:( \\| ){{variable}})?(?:( \\|
-        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
-        ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\|
-        ){{variable}})?{{block_closing}}"
+  piping:
+    - match: "{{function}}"
+      scope: support.function.seagull
+      pop: true
+
+  # Placeholder variables ######################################################
+  # {name}
+  # {name | func}
+  # {name | func | func | func | func}
+  placeholder:
+    - match: "{{block_opening}}{{property}}"
       captures:
         1: entity.name.tag.seagull
-        2: support.constant.seagull
-        3: keyword.operator.bitwise.seagull
-        4: support.function.seagull
-        5: keyword.operator.bitwise.seagull
-        6: support.function.seagull
-        7: keyword.operator.bitwise.seagull
-        8: support.function.seagull
-        9: keyword.operator.bitwise.seagull
-        10: support.function.seagull
-        11: keyword.operator.bitwise.seagull
-        12: support.function.seagull
-        13: keyword.operator.bitwise.seagull
-        14: support.function.seagull
-        15: keyword.operator.bitwise.seagull
-        16: support.function.seagull
-        17: keyword.operator.bitwise.seagull
-        18: support.function.seagull
-        19: entity.name.tag.seagull
+        2: variable.other.seagull
+      push: placeholder_inner
 
-  string_piping_double_quote:
-    - match:
-        "{{block_opening}}(\")([^\n\r]+)(\")( *\\| *){{variable}}(?:( *\\|
-        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
-        *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\|
-        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
-        *\\| *){{variable}})?"
+  placeholder_inner:
+    - match: "{{piping}}"
+      scope: keyword.operator.bitwise.seagull
+      push: piping
+    - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
+      pop: true
+
+  # Placeholder with double quoted strings #####################################
+  # {"hello"}
+  # {"hello" | func}
+  # {"hello" | func | func | func | func}
+  placeholder_with_double_quoted_strings:
+    - match: '{{block_opening}}(")'
       captures:
         1: entity.name.tag.seagull
         2:
           punctuation.definition.string.begin.seagull
           string.quoted.double.seagull
-        3: string.quoted.double.seagull
-        4:
-          punctuation.definition.string.end.seagull string.quoted.double.seagull
-        5: keyword.operator.bitwise.seagull
-        6: support.function.seagull
-        7: keyword.operator.bitwise.seagull
-        8: support.function.seagull
-        9: keyword.operator.bitwise.seagull
-        10: support.function.seagull
-        11: keyword.operator.bitwise.seagull
-        12: support.function.seagull
-        13: keyword.operator.bitwise.seagull
-        14: support.function.seagull
-        15: keyword.operator.bitwise.seagull
-        16: support.function.seagull
-        17: keyword.operator.bitwise.seagull
-        18: support.function.seagull
-        19: keyword.operator.bitwise.seagull
-        20: support.function.seagull
-        21: keyword.operator.bitwise.seagull
-        22: support.function.seagull
-        23: keyword.operator.bitwise.seagull
-        24: support.function.seagull
+      push: double_quoted_string
+    - match: "{{piping}}"
+      scope: keyword.operator.bitwise.seagull
+      push: piping
+    - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
 
-  string_piping_single_quote:
-    - match:
-        "{{block_opening}}(')([^\n\r]+)(')( *\\| *){{variable}}(?:( *\\|
-        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
-        *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\|
-        *){{variable}})?(?:( *\\| *){{variable}})?(?:( *\\| *){{variable}})?(?:(
-        *\\| *){{variable}})?"
+  double_quoted_string:
+    - meta_scope: string.quoted.double.seagull
+    - match: '"'
+      scope: punctuation.definition.string.end.seagull
+      pop: true
+
+  # Placeholder with single quoted strings #####################################
+  placeholder_with_single_quoted_strings:
+    - match: "{{block_opening}}(')"
       captures:
         1: entity.name.tag.seagull
         2:
           punctuation.definition.string.begin.seagull
           string.quoted.single.seagull
-        3: string.quoted.single.seagull
-        4:
-          punctuation.definition.string.end.seagull string.quoted.single.seagull
-        5: keyword.operator.bitwise.seagull
-        6: support.function.seagull
-        7: keyword.operator.bitwise.seagull
-        8: support.function.seagull
-        9: keyword.operator.bitwise.seagull
-        10: support.function.seagull
-        11: keyword.operator.bitwise.seagull
-        12: support.function.seagull
-        13: keyword.operator.bitwise.seagull
-        14: support.function.seagull
-        15: keyword.operator.bitwise.seagull
-        16: support.function.seagull
-        17: keyword.operator.bitwise.seagull
-        18: support.function.seagull
-        19: keyword.operator.bitwise.seagull
-        20: support.function.seagull
-        21: keyword.operator.bitwise.seagull
-        22: support.function.seagull
-        23: keyword.operator.bitwise.seagull
-        24: support.function.seagull
+      push: single_quoted_string
+    - match: "{{piping}}"
+      scope: keyword.operator.bitwise.seagull
+      push: piping
+    - match: "{{block_closing}}"
+      scope: entity.name.tag.seagull
 
-  conditionals:
-    - match:
-        "{{block_opening}}(if|unless) +{{variable}}(?:( \\| ){{variable}})?(?:(
-        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
-        \\| ){{variable}})?(?:( \\| ){{variable}})?(?:( \\| ){{variable}})?(?:(
-        \\| ){{variable}})?{{block_closing}}"
-      captures:
-        1: entity.name.tag.seagull
-        2: keyword.control.conditional.seagull
-        3: variable.other.readwrite.seagull
-        4: keyword.operator.bitwise.seagull
-        5: support.function.seagull
-        6: keyword.operator.bitwise.seagull
-        7: support.function.seagull
-        8: keyword.operator.bitwise.seagull
-        9: support.function.seagull
-        10: keyword.operator.bitwise.seagull
-        11: support.function.seagull
-        12: keyword.operator.bitwise.seagull
-        13: support.function.seagull
-        14: keyword.operator.bitwise.seagull
-        15: support.function.seagull
-        16: keyword.operator.bitwise.seagull
-        17: support.function.seagull
-        20: entity.name.tag.seagull
-      push: conditionals_content
-
-  conditionals_content:
-    - include: main
-    - match: "{{block_opening}}(/\\2){{block_closing}}"
-      captures:
-        1: entity.name.tag.seagull
-        2: keyword.control.conditional.seagull
-        3: entity.name.tag.seagull
+  single_quoted_string:
+    - meta_scope: string.quoted.single.seagull
+    - match: "'"
+      scope: punctuation.definition.string.end.seagull
       pop: true
 
+  # Each block #################################################################
+  # {each person in people}{/each}
+  # {each person, index in people}{/each}
+  # {each key => value in dict}{/each}
+  # {each key => value, index in dict}{/each}
   each:
     - match:
-        "{{block_opening}}(each) +(?:{{variable}}|{{variable}} (=>)
-        {{variable}})(?:, {{variable}})? +(in) +{{variable}}{{block_closing}}"
+        "{{block_opening}}(each) +{{variable}}(?: *(=>) *{{variable}})?(?: *,
+        *{{variable}})? +(in) +{{property}}{{block_closing}}"
       captures:
         1: entity.name.tag.seagull
         2: keyword.control.loop.for.seagull
-        3: variable.other.readwrite.seagull
-        4: variable.other.readwrite.seagull
-        5: keyword.operator.assignment.seagull
-        6: variable.other.readwrite.seagull
-        7: variable.other.readwrite.seagull
-        8: keyword.operator.word.seagull
-        9: variable.other.readwrite.seagull
-        10: entity.name.tag.seagull
-      push: each_content
+        3: variable.other.seagull
+        4: punctuation.separator.key-value.seagull
+        5: variable.other.seagull
+        6: variable.other.seagull
+        7: keyword.operator.seagull
+        8: variable.other.seagull
+        9: entity.name.tag.seagull
+      push: each_inner
 
-  each_content:
+  each_inner:
     - include: main
     - match: "{{block_opening}}(/each){{block_closing}}"
       captures:
         1: entity.name.tag.seagull
         2: keyword.control.loop.for.seagull
+        3: entity.name.tag.seagull
+      pop: true
+
+  # If block ###################################################################
+  # {if condition}{/if}
+  # {if condition | func}{/if}
+  # {if condition | func | func | func | func}{/if}
+  if_conditional:
+    - match: "{{block_opening}}(if) +{{property}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.if.seagull
+        3: variable.other.seagull
+      push: if_inner
+
+  if_inner:
+    - match: "{{piping}}"
+      scope: keyword.operator.bitwise.seagull
+      push: piping
+    - match: "{{block_closing}}"
+    - include: main
+    - match: "{{block_opening}}(/if){{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.end.seagull
+        3: entity.name.tag.seagull
+      pop: true
+
+  # Unless block ###############################################################
+  # {unless condition}{/unless}
+  # {unless condition | func}{/unless}
+  # {unless condition | func | func | func | func}{/unless}
+  unless_conditional:
+    - match: "{{block_opening}}(unless) +{{property}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.unless.seagull
+        3: variable.other.seagull
+      push: unless_inner
+
+  unless_inner:
+    - match: "{{piping}}"
+      scope: keyword.operator.bitwise.seagull
+      push: piping
+    - match: "{{block_closing}}"
+    - include: main
+    - match: "{{block_opening}}(/unless){{block_closing}}"
+      captures:
+        1: entity.name.tag.seagull
+        2: keyword.control.conditional.end.seagull
         3: entity.name.tag.seagull
       pop: true
