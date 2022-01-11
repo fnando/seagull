@@ -11,6 +11,10 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
+## v0.0.5 - 2022-01-11
+
+- [Fixed] Previous release didn't include exported files properly.
+
 ## v0.0.4 - 2022-01-11
 
 - [Added] `{when}` blocks, similar to `if(a === b) {}`.
