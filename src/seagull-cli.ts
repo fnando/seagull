@@ -40,7 +40,7 @@ yargs(process.argv.slice(2))
       try {
         const exports = files.map((relativePath) => {
           filePath = path.resolve(relativePath);
-          const name = path.basename(filePath).split(".")[0];
+          const [name] = path.basename(filePath).split(".");
           const template = fs.readFileSync(filePath).toString("utf-8");
           const compiled =
             `module.exports.${name} = ` +

@@ -201,7 +201,6 @@ const validateExpressionMatches = (
     `Cannot run expression parser without matches: ${expression}`,
   );
 
-  // eslint-disable-next-line prefer-const
   let { line, column } = extractLocation(scope);
   column -= expression.length;
 
@@ -220,7 +219,6 @@ const validateClosingBlock = (
     return;
   }
 
-  // eslint-disable-next-line prefer-const
   let { line, column } = extractLocation(scope);
   column -= currentBlock.length + 2;
 
@@ -247,8 +245,7 @@ const variableExpressionParser = {
       expression.match(this.match),
     );
 
-    const capture = matches[1];
-    const piping = matches[2];
+    const [, capture, piping] = matches;
     let input = `${capture}`;
 
     const globalCaptures = [];
@@ -261,7 +258,7 @@ const variableExpressionParser = {
 
     input = `_encode(${input})`;
 
-    const captureTarget = capture.split(".")[0];
+    const [captureTarget] = capture.split(".");
     const isLocalCapture = hasLocalCapture(scope, captureTarget);
 
     if (!isLocalCapture) {
@@ -277,7 +274,7 @@ const variableExpressionParser = {
 };
 
 const stringPipingExpressionParser = {
-  match: /^{((["']).*?(\2))( *\| *[a-z0-9_.]+)+}$/i,
+  match: /^{((["']).*?\2)( *\| *[a-z0-9_.]+)+}$/i,
   process(expression: string, scope: Scope): ExpressionParserResult {
     const matches = validateExpressionMatches(
       scope,
@@ -285,10 +282,8 @@ const stringPipingExpressionParser = {
       expression.match(this.match),
     );
 
-    const capture = matches[1];
-    const piping = matches[4];
+    const [, capture, , piping] = matches;
     let input = `${capture}`;
-
     const globalCaptures = [];
 
     if (piping) {
@@ -316,8 +311,7 @@ const ifExpressionParser = {
       expression.match(this.match),
     );
 
-    const capture = matches[1];
-    const piping = matches[2];
+    const [, capture, piping] = matches;
     let input = `${capture}`;
     const globalCaptures: string[] = [];
 
@@ -329,7 +323,7 @@ const ifExpressionParser = {
       globalCaptures.push(...chain.captures);
     }
 
-    const captureTarget = capture.split(".")[0];
+    const [captureTarget] = capture.split(".");
     const isLocalCapture = hasLocalCapture(scope, captureTarget);
 
     if (!isLocalCapture) {
@@ -366,19 +360,19 @@ const unlessExpressionParser = {
       expression.match(this.match),
     );
 
-    const capture = matches[1];
+    const [, capture, piping] = matches;
     let input = `${capture}`;
     const globalCaptures: string[] = [];
 
     scope.blocks.push("unless");
 
-    if (matches[2]) {
-      const chain = buildHelperChain(input, matches[2]);
+    if (piping) {
+      const chain = buildHelperChain(input, piping);
       input = chain.output;
       globalCaptures.push(...chain.captures);
     }
 
-    const captureTarget = capture.split(".")[0];
+    const [captureTarget] = capture.split(".");
     const isLocalCapture = hasLocalCapture(scope, captureTarget);
 
     if (!isLocalCapture) {
@@ -408,7 +402,7 @@ const unlessClosingExpressionParser = {
 
 const eachArrayExpressionParser = {
   match:
-    /^{each ([a-zA-z0-9_]+)(?:, *([a-zA-z0-9_]+)(?:, *([a-zA-z0-9_]+))?)? +in +([a-zA-z0-9_.]+)}$/,
+    /^{each ([a-zA-z0-9_]+)(?:, *([a-zA-z0-9_]+))? +in +([a-zA-z0-9_.]+)}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
     const matches = validateExpressionMatches(
       scope,
@@ -416,15 +410,15 @@ const eachArrayExpressionParser = {
       expression.match(this.match),
     );
 
-    const iteratee = matches[1];
-    const index = matches[2] ?? "_index";
-    const iterable = matches[4];
+    const [, iteratee, index, iterable] = matches;
 
     scope.blocks.push("each");
     const isLocalCapture = hasLocalCapture(scope, iterable);
 
     return {
-      output: ` + (${iterable}).map((${iteratee}, ${index}) => { return ""`,
+      output: ` + (${iterable}).map((${iteratee}, ${
+        index ?? "_index"
+      }) => { return ""`,
       globalCaptures: [!isLocalCapture ? iterable : ""].filter(Boolean),
       localCaptures: [isLocalCapture ? iterable : ""].filter(Boolean),
     };
@@ -441,16 +435,15 @@ const eachDictionaryExpressionParser = {
       expression.match(this.match),
     );
 
-    const key = matches[1];
-    const value = matches[2];
-    const index = matches[3] ?? "_index";
-    const iterable = matches[4];
+    const [, key, value, index, iterable] = matches;
 
     scope.blocks.push("each");
     const isLocalCapture = hasLocalCapture(scope, iterable);
 
     return {
-      output: ` + (Object.keys(${iterable}).map((_key) => [_key, ${iterable}[_key]])).map(([${key}, ${value}], ${index}) => { return ""`,
+      output: ` + (Object.keys(${iterable}).map((_key) => [_key, ${iterable}[_key]])).map(([${key}, ${value}], ${
+        index ?? "_index"
+      }) => { return ""`,
       globalCaptures: [!isLocalCapture ? iterable : ""].filter(Boolean),
       localCaptures: [isLocalCapture ? iterable : ""].filter(Boolean),
     };
@@ -480,21 +473,20 @@ const functionCallExpressionParser = {
       expression.match(this.match),
     );
 
-    const capture = matches[1];
-    let rawAttrs = matches[2].trim();
+    let [, capture, rawAttrs] = matches;
+    rawAttrs = rawAttrs.trim();
     const globalCaptures = [];
     const regex = /([a-z0-9_]+)=(".*?"|'.*?'|[a-z0-9_.]+)/;
     let result = regex.exec(rawAttrs);
     const attrs: string[] = [];
 
     while (result) {
-      const key = result[1];
-      const value = result[2];
+      const [, key, value] = result;
 
       attrs.push(key === value ? key : `${key}: ${value}`);
 
       if (!value.match(/^["']/)) {
-        const valueTarget = value.split(".")[0];
+        const [valueTarget] = value.split(".");
         const isLocalCapture = hasLocalCapture(scope, valueTarget);
 
         if (!isLocalCapture) {
@@ -502,13 +494,13 @@ const functionCallExpressionParser = {
         }
       }
 
-      rawAttrs = rawAttrs.substring(result[0].length).trim();
+      rawAttrs = rawAttrs.substring(key.length).trim();
       result = regex.exec(rawAttrs);
     }
 
     const input = `_encode(${capture}({${attrs.join(", ")}}))`;
 
-    const captureTarget = capture.split(".")[0];
+    const [captureTarget] = capture.split(".");
     const isLocalCapture = hasLocalCapture(scope, captureTarget);
 
     if (!isLocalCapture) {
@@ -626,7 +618,6 @@ export const compileToFunctionString = (
   template: string,
   includeEscapeHelper = true,
 ): string => {
-  // eslint-disable-next-line prefer-const
   let { output, captures } = compileToString(parse(template));
 
   if (includeEscapeHelper) {
@@ -647,7 +638,6 @@ export const compileToFunctionString = (
  * @return {function} The function representation.
  */
 export const compile = (template: string, includeEscapeHelper = true) => {
-  // eslint-disable-next-line prefer-const
   let { output, captures } = compileToString(parse(template));
 
   if (includeEscapeHelper) {
