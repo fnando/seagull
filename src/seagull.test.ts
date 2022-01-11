@@ -1,58 +1,41 @@
+import fs from "fs";
 import { compile, decode } from "seagull";
 
 const context = {
+  isEmpty: (list: unknown[]) => list.length === 0,
+  upcase: (input: string) => input.toUpperCase(),
+  downcase: (input: string) => input.toLowerCase(),
   people: [{ name: "John" }, { name: "Jane" }],
   name: "Mary",
-  upcase: (input: unknown) =>
-    typeof input === "string" ? input.toUpperCase() : "",
-  downcase: (input: unknown) =>
-    typeof input === "string" ? input.toLowerCase() : "",
-  reverse: (input: unknown) =>
-    String(input || "")
-      .split("")
-      .reduce((buffer, char) => [char, ...buffer], [] as string[])
-      .join(""),
   emptyList: [],
-  isEmpty: (list: unknown[]) => list.length === 0,
-  colors: {
-    red: "#f00",
-    green: "#0f0",
-  },
-  undef: undefined,
-  nulled: null,
-  falsy: false,
-  truthy: true,
+  colors: { red: "#f00", green: "#0f0" },
 };
 
 describe("seagull", () => {
+  test("compiles reference template", () => {
+    expect(() =>
+      compile(
+        fs.readFileSync("./reference.sea", { encoding: "utf-8" }).toString(),
+      ),
+    ).not.toThrow();
+  });
+
   test("compiles template with escaping strings", () => {
     const render = compile(`"\n\r\t`);
     expect(render(context)).toEqual(`"\n\r\t`);
   });
 
   test("compiles variable", () => {
-    const render = compile(`Hello there, {name}.`);
-    expect(render(context)).toEqual("Hello there, Mary.");
+    expect(compile(`{name}`)(context)).toEqual("Mary");
+    expect(compile(`{user.name}`)({ user: { name: "Jane" } })).toEqual("Jane");
   });
 
   test("compiles piped variable", () => {
     let render = compile(`{name | upcase}`);
     expect(render(context)).toEqual("MARY");
 
-    render = compile(`{name | upcase | downcase | reverse}`);
-    expect(render(context)).toEqual("yram");
-
-    render = compile(`{undef | upcase}`);
-    expect(render(context)).toEqual("");
-
-    render = compile(`{nulled | upcase}`);
-    expect(render(context)).toEqual("");
-
-    render = compile(`{falsy | upcase}`);
-    expect(render(context)).toEqual("");
-
-    render = compile(`{truthy | upcase}`);
-    expect(render(context)).toEqual("");
+    render = compile(`{name | upcase | downcase}`);
+    expect(render(context)).toEqual("mary");
   });
 
   test("compiles each for array", () => {
@@ -150,6 +133,44 @@ describe("seagull", () => {
     expect(compile(`{"hello" | upcase}`)(context)).toEqual("HELLO");
     expect(compile(`{'hello' | upcase}`)(context)).toEqual("HELLO");
     expect(compile(`{'hello' | upcase | downcase}`)(context)).toEqual("hello");
+  });
+
+  test("calls helper passing variable as the value", () => {
+    const calls: unknown[] = [];
+    const name = "John";
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn name=name}`)({ fn, name })).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ name }]);
+  });
+
+  test("calls helper passing property as the value", () => {
+    const calls: unknown[] = [];
+    const user = { name: "John" };
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn name=user.name}`)({ fn, user })).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ name: user.name }]);
+  });
+
+  test("calls helper passing double quoted string as the value", () => {
+    const calls: unknown[] = [];
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn name="John"}`)({ fn })).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ name: "John" }]);
   });
 
   test("raises error when blocks are closed in wrong order", () => {
