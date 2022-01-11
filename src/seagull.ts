@@ -77,6 +77,14 @@ class UnknownExpressionError extends Error {
   } = { expression: "", line: 1, column: 1 };
 }
 
+class GenericExpressionError extends Error {
+  public detail: {
+    line: number;
+    column: number;
+    expression: string;
+  } = { expression: "", line: 1, column: 1 };
+}
+
 export const encodeHelper = `
 const _encode = (unsafe) =>
   String(unsafe).replace(
@@ -160,7 +168,50 @@ const hasLocalCapture = (scope: Scope, capture: string): boolean =>
     .flatMap((captures) => Array.from(captures.values()))
     .includes(capture);
 
-const validateClosingBlock = (scope: Scope, currentBlock: string) => {
+const validateKnownExpressionParser = (
+  expression: string,
+  location: Location,
+  parser: ExpressionParser | undefined,
+): ExpressionParser | never => {
+  if (parser) {
+    return parser;
+  }
+
+  const { line, column } = location;
+
+  const error = new UnknownExpressionError(
+    `Unknown expression: ${expression} (line: ${line}, column: ${column})`,
+  );
+
+  error.detail = { line, column, expression };
+
+  throw error;
+};
+
+const validateExpressionMatches = (
+  scope: Scope,
+  expression: string,
+  matches: RegExpMatchArray | null,
+): RegExpMatchArray | never => {
+  if (matches) {
+    return matches;
+  }
+
+  const error = new GenericExpressionError(
+    `Cannot run expression parser without matches: ${expression}`,
+  );
+  let { line, column } = extractLocation(scope);
+  column -= expression.length;
+
+  error.detail = { line, column, expression };
+
+  throw error;
+};
+
+const validateClosingBlock = (
+  scope: Scope,
+  currentBlock: string,
+): void | never => {
   const expectedBlock = scope.blocks.pop() ?? "unknown";
 
   if (expectedBlock === currentBlock) {
@@ -188,21 +239,20 @@ const validateClosingBlock = (scope: Scope, currentBlock: string) => {
 const variableExpressionParser = {
   match: /^{([a-z0-9._]+)((?: *\| *[a-z0-9_]+)+)?}$/i,
   process(expression: string, scope: Scope): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const capture = matches[1];
+    const piping = matches[2];
     let input = `${capture}`;
 
     const globalCaptures = [];
 
-    if (matches[2]) {
-      const chain = buildHelperChain(input, matches[2]);
+    if (piping) {
+      const chain = buildHelperChain(input, piping);
       globalCaptures.push(...chain.captures);
       input = chain.output;
     }
@@ -226,22 +276,21 @@ const variableExpressionParser = {
 
 const stringPipingExpressionParser = {
   match: /^{((["']).*?(\2))( *\| *[a-z0-9_.]+)+}$/i,
-  process(expression: string): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+  process(expression: string, scope: Scope): ExpressionParserResult {
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const capture = matches[1];
+    const piping = matches[4];
     let input = `${capture}`;
 
     const globalCaptures = [];
 
-    if (matches[4]) {
-      const chain = buildHelperChain(input, matches[4]);
+    if (piping) {
+      const chain = buildHelperChain(input, piping);
       globalCaptures.push(...chain.captures);
       input = chain.output;
     }
@@ -259,22 +308,21 @@ const stringPipingExpressionParser = {
 const ifExpressionParser = {
   match: /^{if ([a-zA-z0-9._]+)((?: *\| *[a-zA-z0-9_]+)+)?}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const capture = matches[1];
+    const piping = matches[2];
     let input = `${capture}`;
     const globalCaptures: string[] = [];
 
     scope.blocks.push("if");
 
-    if (matches[2]) {
-      const chain = buildHelperChain(input, matches[2]);
+    if (piping) {
+      const chain = buildHelperChain(input, piping);
       input = chain.output;
       globalCaptures.push(...chain.captures);
     }
@@ -310,13 +358,11 @@ const ifClosingExpressionParser = {
 const unlessExpressionParser = {
   match: /^{unless ([a-zA-z0-9._]+)((?: *\| *[a-zA-z0-9_]+)+)?}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const capture = matches[1];
     let input = `${capture}`;
@@ -362,13 +408,11 @@ const eachArrayExpressionParser = {
   match:
     /^{each ([a-zA-z0-9_]+)(?:, *([a-z0-9_]+)(?:, *([a-z0-9_]+))?)? +in +([a-zA-z0-9_.]+)}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const iteratee = matches[1];
     const index = matches[2] ?? "_index";
@@ -389,13 +433,11 @@ const eachDictionaryExpressionParser = {
   match:
     /^{each ([a-zA-z0-9_]+) *=> *([a-zA-z0-9_]+)(?:, *([a-z0-9_]+))? +in +([a-zA-z0-9_.]+)}$/,
   process(expression: string, scope: Scope): ExpressionParserResult {
-    const matches = expression.match(this.match);
-
-    if (!matches) {
-      throw new Error(
-        `Running expression parser that didn't return any matches: ${expression}`,
-      );
-    }
+    const matches = validateExpressionMatches(
+      scope,
+      expression,
+      expression.match(this.match),
+    );
 
     const key = matches[1];
     const value = matches[2];
@@ -448,19 +490,11 @@ const compileExpression = (
   scope: Scope,
   location: Location,
 ): ExpressionParserResult => {
-  const parser = expressionParsers.find((exp) => exp.match.test(expression));
-
-  if (!parser) {
-    const { line, column } = location;
-
-    const error = new UnknownExpressionError(
-      `Unknown expression: ${expression} (line: ${line}, column: ${column})`,
-    );
-
-    error.detail = { line, column, expression };
-
-    throw error;
-  }
+  const parser = validateKnownExpressionParser(
+    expression,
+    location,
+    expressionParsers.find((exp) => exp.match.test(expression)),
+  );
 
   return parser.process(expression, scope);
 };
