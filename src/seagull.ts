@@ -669,7 +669,9 @@ export const compileToFunctionString = (
     output = `${encodeHelper}\n${output}`;
   }
 
-  return `function ${name}({${captures.join(", ")}}) { ${output} }`;
+  const args = captures.length ? `{${captures.join(", ")}}` : "";
+
+  return `function ${name}(${args}) { ${output} }`;
 };
 
 /**
@@ -690,7 +692,9 @@ export const compile = (template: string, includeEscapeHelper = true) => {
   }
 
   try {
-    return new Function(`{${captures.join(", ")}}`, output);
+    const args = captures.length ? `{${captures.join(", ")}}` : "";
+
+    return new Function(args, output);
   } catch (originalError) {
     const error = new InvalidTemplateError(
       "The template generated invalid JavaScript code.",

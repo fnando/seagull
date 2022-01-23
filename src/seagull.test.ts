@@ -25,6 +25,12 @@ describe("seagull", () => {
     expect(render(context)).toEqual(`"\n\r\t`);
   });
 
+  test("compiles template without variables", () => {
+    const render = compile(`hello`);
+
+    expect(render(context)).toEqual(`hello`);
+  });
+
   test("compiles variable", () => {
     expect(compile(`{name}`)(context)).toEqual("Mary");
     expect(compile(`{user.name}`)({ user: { name: "Jane" } })).toEqual("Jane");
