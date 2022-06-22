@@ -33,7 +33,7 @@
     "@fnando/codestyle": "^0.0.13",
     "@fnando/eslint-config-codestyle": "^0.0.10",
     "@types/glob": "^7.2.0",
-    "@types/jest": "^27.4.0",
+    "@types/jest": "^28.1.3",
     "@types/yargs": "^17.0.8",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
