@@ -11,6 +11,10 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
+## v0.0.7 - 2023-01-17
+
+- [Fixed] Just pack a subset of files.
+
 ## v0.0.6 - 2023-01-17
 
 - [Changed] Compiled function now respects templates without captures and set
