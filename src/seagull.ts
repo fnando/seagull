@@ -597,7 +597,10 @@ const compileExpression = (
  * @param {string[]} tree The template tree.
  * @return {CompileToStringResult} The result.
  */
-export const compileToString = (tree: string[]): CompileToStringResult => {
+export const compileToString = (
+  tree: string[],
+  { includeEscapeHelper }: { includeEscapeHelper: boolean },
+): CompileToStringResult => {
   let fnStr = `""`;
 
   const scope: Scope = {
@@ -643,11 +646,23 @@ export const compileToString = (tree: string[]): CompileToStringResult => {
     }
   });
 
+  const captures = Array.from<string>(scope.globalCaptures.values());
+
+  const output = [
+    includeEscapeHelper ? encodeHelper : null,
+    `const {${captures.join(", ")}} = context || {};`,
+    `return (${fnStr});`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
   return {
-    output: `return (${fnStr});`,
-    captures: Array.from<string>(scope.globalCaptures.values()),
+    output,
+    captures,
   };
 };
+
+// const compileFunctionArguments = () => {};
 
 /**
  * Compile a template to a function string.
@@ -663,15 +678,11 @@ export const compileToFunctionString = (
   template: string,
   includeEscapeHelper = true,
 ): string => {
-  let { output, captures } = compileToString(parse(template));
+  const { output } = compileToString(parse(template), {
+    includeEscapeHelper,
+  });
 
-  if (includeEscapeHelper) {
-    output = `${encodeHelper}\n${output}`;
-  }
-
-  const args = captures.length ? `{${captures.join(", ")}}` : "";
-
-  return `function ${name}(${args}) { ${output} }`;
+  return `function ${name}(context) { ${output} }`;
 };
 
 /**
@@ -685,16 +696,12 @@ export const compileToFunctionString = (
  * @return {function} The function representation.
  */
 export const compile = (template: string, includeEscapeHelper = true) => {
-  let { output, captures } = compileToString(parse(template));
-
-  if (includeEscapeHelper) {
-    output = `${encodeHelper}\n${output}`;
-  }
+  const { output, captures } = compileToString(parse(template), {
+    includeEscapeHelper,
+  });
 
   try {
-    const args = captures.length ? `{${captures.join(", ")}}` : "";
-
-    return new Function(args, output);
+    return new Function("context", output);
   } catch (originalError) {
     const error = new InvalidTemplateError(
       "The template generated invalid JavaScript code.",
