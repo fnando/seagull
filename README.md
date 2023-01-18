@@ -183,24 +183,71 @@ test("renders template", () => {
 });
 ```
 
+### Using TypeScript
+
+Seagull doesn't have direct TypeScript support, but that doesn't mean you can't
+use typed template functions.
+
+The way I like to do it is by creating a file called `templates.d.ts` somewhere
+(e.g. if I export the templates to `src/helpers/templates.js`, then I use
+`src/helpers/templates.d.ts`). This file will hold all function types.
+
+Let's say I have a template function that works like `hello({name: "John"})`; in
+this case, my module declaration would look like this:
+
+```typescript
+declare module "src/helpers/templates" {
+  export function hello(params: { firstName: string }): string;
+  export function goodbye(params: { lastName: string }): string;
+}
+```
+
+If you're using helpers, tem you can also type an intermediary `template`
+function.
+
+```typescript
+import * as templates from "src/helpers/templates";
+
+// Add your helpers here
+// You don't have to inline them (e.g. use `const helpers = {helper}` instead).
+const helpers = {};
+
+export function template<
+  T extends keyof typeof templates,
+  P = Parameters<typeof templates[T]>[0],
+>(name: T, params: P): string {
+  // @ts-expect-error injecting helpers
+  return templates[name]({ ...params, ...helpers });
+}
+```
+
+To call the templates using this function:
+
+```typescript
+import { template } from "src/helpers/template;
+
+console.log(template("hello", {firstName: "John"}));
+console.log(template("goodbye", {lastName: "Doe"}));
+```
+
 ## Maintainer
 
 - [Nando Vieira](https://github.com/fnando)
 
 ## Contributors
 
-- https://github.com/fnando/seagull/contributors
+- <https://github.com/fnando/seagull/contributors>
 
 ## Contributing
 
 For more details about how to contribute, please read
-https://github.com/fnando/seagull/blob/main/CONTRIBUTING.md.
+<https://github.com/fnando/seagull/blob/main/CONTRIBUTING.md>.
 
 ## License
 
 The gem is available as open source under the terms of the
 [MIT License](https://opensource.org/licenses/MIT). A copy of the license can be
-found at https://github.com/fnando/seagull/blob/main/LICENSE.md.
+found at <https://github.com/fnando/seagull/blob/main/LICENSE.md>.
 
 ## Code of Conduct
 

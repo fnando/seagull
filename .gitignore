@@ -11,3 +11,5 @@
 *.lock
 dist/
 *.tgz
+node_modules
+/examples/dist

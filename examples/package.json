@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@fnando/seagull": "^0.0.5",
+    "typescript": "^4.9.4"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "name": "examples",
+  "scripts": {
+    "compile": "yarn compile:seagull && yarn compile:ts",
+    "compile:seagull": "seagull compile --input 'src/templates/**/*.sea' --output src/helpers/templates.js",
+    "compile:ts": "tsc"
+  },
+  "version": "0.0.0"
+}
