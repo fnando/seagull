@@ -1,7 +1,6 @@
 # @fnando/seagull
 
 [![Tests](https://github.com/fnando/seagull/workflows/node-tests/badge.svg)](https://github.com/fnando/seagull)
-[![Code Climate](https://codeclimate.com/github/fnando/seagull/badges/gpa.svg)](https://codeclimate.com/github/fnando/seagull)
 [![NPM](https://img.shields.io/npm/v/@fnando/seagull.svg)](https://npmjs.org/package/@fnando/seagull)
 [![NPM](https://img.shields.io/npm/dt/@fnando/seagull.svg)](https://npmjs.org/package/@fnando/seagull)
 
