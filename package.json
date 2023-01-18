@@ -9,23 +9,23 @@
   },
   "bugs": "https://github.com/fnando/seagull/issues",
   "dependencies": {
-    "glob": "^7.2.0",
+    "glob": "^8.1.0",
     "yargs": "^17.3.1"
   },
   "description": "Minimal template engine with compiled output for JavaScript.",
   "devDependencies": {
-    "@fnando/codestyle": "^0.0.13",
-    "@fnando/eslint-config-codestyle": "^0.0.10",
-    "@types/glob": "^7.2.0",
-    "@types/jest": "^27.4.0",
-    "@types/yargs": "^17.0.8",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "eslint": "^8.6.0",
-    "jest": "^27.4.7",
-    "prettier": "^2.5.1",
-    "ts-jest": "^27.1.2",
-    "typescript": "^4.5.4"
+    "@fnando/codestyle": "*",
+    "@fnando/eslint-config-codestyle": "*",
+    "@types/glob": "*",
+    "@types/jest": "*",
+    "@types/yargs": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "@typescript-eslint/parser": "*",
+    "eslint": "*",
+    "jest": "*",
+    "prettier": "*",
+    "ts-jest": "*",
+    "typescript": "*"
   },
   "files": [
     "src",
