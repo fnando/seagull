@@ -1,34 +1,18 @@
 {
-  "name": "@fnando/seagull",
-  "version": "0.0.5",
-  "description": "Minimal template engine with compiled output for JavaScript.",
-  "main": "./dist/seagull.js",
-  "typings": "./dist/seagull.d.ts",
-  "keywords": [
-    "template",
-    "templates",
-    "seagull"
-  ],
   "author": {
-    "name": "Nando Vieira",
     "email": "me@fnando.com",
+    "name": "Nando Vieira",
     "url": "https://nandovieira.com/"
   },
   "bin": {
     "seagull": "./dist/seagull-cli.js"
   },
-  "homepage": "https://github.com/fnando/seagull",
-  "license": "MIT",
   "bugs": "https://github.com/fnando/seagull/issues",
-  "repository": "https://github.com/fnando/seagull.git",
-  "scripts": {
-    "test": "jest --watch",
-    "test:ci": "jest && yarn lint",
-    "lint": "yarn lint:ts && yarn lint:eslint",
-    "lint:ts": "tsc --noEmit",
-    "lint:eslint": "eslint src --max-warnings 0",
-    "build": "rm -rf dist && tsc"
+  "dependencies": {
+    "glob": "^7.2.0",
+    "yargs": "^17.3.1"
   },
+  "description": "Minimal template engine with compiled output for JavaScript.",
   "devDependencies": {
     "@fnando/codestyle": "^0.0.13",
     "@fnando/eslint-config-codestyle": "^0.0.10",
@@ -43,8 +27,24 @@
     "ts-jest": "^27.1.2",
     "typescript": "^4.5.4"
   },
-  "dependencies": {
-    "glob": "^7.2.0",
-    "yargs": "^17.3.1"
-  }
+  "homepage": "https://github.com/fnando/seagull",
+  "keywords": [
+    "template",
+    "templates",
+    "seagull"
+  ],
+  "license": "MIT",
+  "main": "./dist/seagull.js",
+  "name": "@fnando/seagull",
+  "repository": "https://github.com/fnando/seagull.git",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "lint": "yarn lint:ts && yarn lint:eslint",
+    "lint:eslint": "eslint src --max-warnings 0",
+    "lint:ts": "tsc --noEmit",
+    "test": "jest --watch",
+    "test:ci": "jest && yarn lint"
+  },
+  "typings": "./dist/seagull.d.ts",
+  "version": "0.0.6"
 }

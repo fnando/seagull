@@ -11,7 +11,7 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
-## Unreleased
+## v0.0.6 - 2023-01-17
 
 - [Changed] Compiled function now respects templates without captures and set
   arguments properly.
