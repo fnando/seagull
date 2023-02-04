@@ -194,6 +194,18 @@ describe("seagull", () => {
     expect(calls[0]).toEqual([{ name: "John" }]);
   });
 
+  test("calls helper passing multiple properties", () => {
+    const calls: unknown[] = [];
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn name="John" age="42"}`)({ fn })).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ name: "John", age: "42" }]);
+  });
+
   test("raises error when blocks are closed in wrong order", () => {
     expect(() => {
       compile(`

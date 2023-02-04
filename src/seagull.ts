@@ -508,7 +508,7 @@ const eachClosingExpressionParser = {
 };
 
 const functionCallExpressionParser = {
-  match: /^{([a-z0-9._]+)( +[a-z0-9_]+=('.*?'|".*?"|[a-z0-9_.]+))+}$/i,
+  match: /^{([a-z0-9._]+)((?: +[a-z0-9_]+=(?:'.*?'|".*?"|[a-z0-9_.]+))+)}$/i,
   process(expression: string, scope: Scope): ExpressionParserResult {
     const matches = validateExpressionMatches(
       scope,
@@ -519,7 +519,7 @@ const functionCallExpressionParser = {
     let [, capture, rawAttrs] = matches;
     rawAttrs = rawAttrs.trim();
     const globalCaptures = [];
-    const regex = /([a-z0-9_]+)=(".*?"|'.*?'|[a-z0-9_.]+)/;
+    const regex = /([a-z0-9_]+)=(".*?"|'.*?'|[a-z0-9_.]+)/i;
     let result = regex.exec(rawAttrs);
     const attrs: string[] = [];
 
@@ -537,7 +537,7 @@ const functionCallExpressionParser = {
         }
       }
 
-      rawAttrs = rawAttrs.substring(key.length).trim();
+      rawAttrs = rawAttrs.substring(result[0].length).trim();
       result = regex.exec(rawAttrs);
     }
 

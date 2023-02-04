@@ -11,6 +11,10 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
+## Unreleased
+
+- [Fixed] Fix helper call with multiple arguments.
+
 ## v0.0.7 - 2023-01-17
 
 - [Fixed] Just pack a subset of files.
