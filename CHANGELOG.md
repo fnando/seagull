@@ -11,7 +11,7 @@ Prefix your message with one of the following:
 - [Security] in case of vulnerabilities.
 -->
 
-## Unreleased
+## v0.0.8 - 2023-02-04
 
 - [Fixed] Fix helper call with primitives values (`true`, `false`, `null`,
   `undefined`, numbers).
