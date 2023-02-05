@@ -13,6 +13,8 @@ Prefix your message with one of the following:
 
 ## Unreleased
 
+- [Fixed] Fix helper call with primitives values (`true`, `false`, `null`,
+  `undefined`, numbers).
 - [Fixed] Fix helper call with multiple arguments.
 
 ## v0.0.7 - 2023-01-17

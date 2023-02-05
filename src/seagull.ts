@@ -528,7 +528,11 @@ const functionCallExpressionParser = {
 
       attrs.push(key === value ? key : `${key}: ${value}`);
 
-      if (!value.match(/^["']/)) {
+      const isPrimitive =
+        value.match(/^\d+|\d+\.\d+$/) ||
+        ["true", "false", "null", "undefined"].includes(value);
+
+      if (!isPrimitive && !value.match(/^["']/)) {
         const [valueTarget] = value.split(".");
         const isLocalCapture = hasLocalCapture(scope, valueTarget);
 

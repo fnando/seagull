@@ -206,6 +206,46 @@ describe("seagull", () => {
     expect(calls[0]).toEqual([{ name: "John", age: "42" }]);
   });
 
+  test("calls helper with numeric value", () => {
+    const calls: unknown[] = [];
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn age=42 salary=1234.5678}`)({ fn })).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ age: 42, salary: 1234.5678 }]);
+  });
+
+  test("calls helper with boolean value", () => {
+    const calls: unknown[] = [];
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(compile(`{fn enabled=true disabled=false}`)({ fn })).toEqual(
+      "called",
+    );
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ enabled: true, disabled: false }]);
+  });
+
+  test("calls helper with null and undefined values", () => {
+    const calls: unknown[] = [];
+    const fn = (...args: unknown[]) => {
+      calls.push(args);
+      return "called";
+    };
+
+    expect(
+      compile(`{fn nullValue=null undefinedValue=undefined}`)({ fn }),
+    ).toEqual("called");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual([{ nullValue: null, undefinedValue: undefined }]);
+  });
+
   test("raises error when blocks are closed in wrong order", () => {
     expect(() => {
       compile(`
