@@ -69,3 +69,12 @@
 {unless isReady}
   <p class="pending">Pending!</p>
 {/unless}
+
+{trunc text="Hello" size=10}
+{trunc text="Hello" size=10.0}
+{type value=1234}
+{type value=1234.567}
+{type value=null}
+{type value=undefined}
+{type value=true}
+{type value=false}
