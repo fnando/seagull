@@ -10,6 +10,7 @@ variables:
   variable: "([a-zA-Z_][a-zA-Z0-9_]*)"
   property: "([a-zA-Z_][a-zA-Z0-9_]*(?:\\.?[a-zA-Z_][a-zA-Z_0-9]*)*)"
   function: "([a-zA-Z_][a-zA-Z0-9_]*)"
+  integer: "([0-9]+)"
   piping: "\\|"
 version: 2
 contexts:
@@ -29,7 +30,37 @@ contexts:
       pop: true
 
   key_value:
-    - match: "{{variable}}(=){{property}}"
+    - match: "{{variable}}(=)(true)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.language.boolean.true.seagull
+    - match: "{{variable}}(=)(false)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.language.boolean.false.seagull
+    - match: "{{variable}}(=)([0-9]+\\.[0-9]+)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.numeric.float.seagull
+    - match: "{{variable}}(=)([0-9]+)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.numeric.integer.seagull
+    - match: "{{variable}}(=)(null)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.language.null.seagull
+    - match: "{{variable}}(=)(undefined)"
+      captures:
+        1: variable.other.seagull
+        2: keyword.operator.assignment.seagull
+        3: constant.language.undefined.seagull
+    - match: "{{variable}}(=)({{property}})"
       captures:
         1: variable.other.seagull
         2: keyword.operator.assignment.seagull
