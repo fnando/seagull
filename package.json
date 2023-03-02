@@ -9,7 +9,7 @@
   },
   "bugs": "https://github.com/fnando/seagull/issues",
   "dependencies": {
-    "glob": "^8.1.0",
+    "glob": "^9.1.2",
     "yargs": "^17.3.1"
   },
   "description": "Minimal template engine with compiled output for JavaScript.",
